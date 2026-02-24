@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "app": "concurrently  --names \"docker,bot\" --prefix name  \"(docker compose up -d)\" \"(npm run start:dev --prefix bot)\" \"(npm run start:dev --prefix buh)\"",
+    "app": "concurrently  --names \"docker,bot,buh\" --prefix name  \"(docker compose up -d)\" \"(npm run start:dev --prefix bot)\" \"(npm run start:dev --prefix buh)\"",
     "npmi": "concurrently \"(npm i)\" \"(npm i --prefix bot)\" \"(npm i --prefix buh)\"",
     "push": "node push.js",
     "pull": "git pull origin main"

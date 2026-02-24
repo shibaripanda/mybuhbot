@@ -7,7 +7,7 @@ import { KafkaService } from './kafka.service';
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'KAFKA_BOT_SERVICE',
+        name: 'KAFKA_BUH_SERVICE',
         useFactory: (configService: ConfigService) => ({
           transport: Transport.KAFKA,
           options: {

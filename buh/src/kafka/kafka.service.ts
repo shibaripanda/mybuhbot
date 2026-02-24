@@ -4,7 +4,7 @@ import { ClientKafka } from '@nestjs/microservices';
 @Injectable()
 export class KafkaService implements OnModuleInit {
   constructor(
-    @Inject('KAFKA_BOT_SERVICE') private readonly kafkaClient: ClientKafka,
+    @Inject('KAFKA_BUH_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {
     console.log('KafkaService start');
   }
