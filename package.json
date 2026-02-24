@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "app": "concurrently  --names \"docker,bot\" --prefix name  \"(docker compose up -d)\" \"(npm run start:dev --prefix bot)\"",
+    "npmi": "concurrently \"(npm i)\" \"(npm i --prefix bot)\"",
+    "push": "node push.js",
+    "pull": "git pull origin main"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
