@@ -4,6 +4,9 @@ import { Ctx, On, Start, Update } from 'nestjs-telegraf';
 import { Context, NarrowedContext } from 'telegraf';
 import { AdminAccessGuard } from './guards/access-control.guard';
 import { BotService } from './bot.service';
+import { BotKeyboardService } from './bot.keyboard.service';
+import { BotTextService } from './bot.text.service';
+import { OpenaiVoiceService } from 'src/openai/openai.voice.service';
 
 export type UserTelegrafContext = NarrowedContext<
   Context,
@@ -12,25 +15,35 @@ export type UserTelegrafContext = NarrowedContext<
 
 @Update()
 export class TelegramGateway {
-  constructor(private botService: BotService) {}
+  constructor(
+    private botService: BotService,
+    private botKeyboardService: BotKeyboardService,
+    private botTextService: BotTextService,
+    private openaiVoiceService: OpenaiVoiceService,
+  ) {}
 
   @UseGuards(AdminAccessGuard)
   @Start()
-  start(@Ctx() ctx: UserTelegrafContext) {
+  async start(@Ctx() ctx: UserTelegrafContext) {
     console.log('@Start');
+    if (!ctx.from) return;
     console.log(ctx.from);
+    const keyboard = this.botKeyboardService.keyboardStart();
+    const text = this.botTextService.textStart();
+    await this.botService.sendMessageReply(ctx.from.id, text, keyboard);
   }
 
   @On('voice')
   async onVoice(@Ctx() ctx: UserTelegrafContext) {
     const voice = ctx.message['voice'];
 
-    console.log('voice');
-    console.log(ctx.from);
-    console.log('VOICE FILE ID:', voice.file_id);
     console.log('DURATION:', voice.duration);
 
-    await ctx.reply('Получил голосовое 🎧');
-    await this.botService.newAdd(voice.file_id);
+    // const voiceBuffer = await this.botService.getVoiceBuffer(voice.file_id);
+    const text = await this.openaiVoiceService.voiceProcessingToText(
+      voice.file_id,
+    );
+    console.log(text);
+    await this.botService.sendMessageReply(ctx.from.id, JSON.stringify(text));
   }
 }

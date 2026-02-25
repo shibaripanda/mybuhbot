@@ -1,21 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { OpenaiVoiceService } from 'src/openai/openai.voice.service';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import axios, { AxiosResponse } from 'axios';
+import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 
 @Injectable()
 export class BotService {
-  constructor(
-    private openaiVoiceService: OpenaiVoiceService,
-    @InjectBot() private bot: Telegraf,
-  ) {}
+  constructor(@InjectBot() private bot: Telegraf) {}
 
-  async newAdd(file_id: string) {
+  async sendMessageReply(
+    chatId: number,
+    text: string,
+    keyboard?: InlineKeyboardButton[][],
+  ): Promise<void> {
+    await this.bot.telegram.sendMessage(chatId, text, {
+      reply_markup: keyboard && { inline_keyboard: keyboard },
+    });
+  }
+
+  async getVoiceBuffer(file_id: string) {
     const flink = await this.getFileLink(file_id);
-    const buffer = await this.getBuffer(flink);
-    const res = await this.openaiVoiceService.getReqData(buffer);
-    console.log(res);
+    return await this.getBuffer(flink);
   }
 
   private async getFileLink(file_id: string) {

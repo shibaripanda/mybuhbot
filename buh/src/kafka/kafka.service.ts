@@ -6,7 +6,7 @@ export class KafkaService implements OnModuleInit {
   constructor(
     @Inject('KAFKA_BUH_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {
-    console.log('KafkaService start');
+    console.log('KafkaBuhService start');
   }
 
   onModuleInit() {

@@ -6,7 +6,6 @@ import { OpenaiModule } from 'src/openai/openai.module';
 
 @Module({
   imports: [GlobalConfigModule, BotModule, OpenaiModule, KafkaModule],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}

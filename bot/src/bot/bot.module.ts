@@ -8,6 +8,9 @@ import { Update } from '@telegraf/types';
 import { TelegramGateway } from './bot.telegram.gateway';
 import { BotService } from './bot.service';
 import { OpenaiModule } from 'src/openai/openai.module';
+import { BotLifecycleService } from './bot.lifecycle.service';
+import { BotKeyboardService } from './bot.keyboard.service';
+import { BotTextService } from './bot.text.service';
 
 @Module({
   imports: [
@@ -27,8 +30,13 @@ import { OpenaiModule } from 'src/openai/openai.module';
     }),
     OpenaiModule,
   ],
-  controllers: [],
-  providers: [BotService, TelegramGateway],
-  exports: [],
+  providers: [
+    BotService,
+    TelegramGateway,
+    BotLifecycleService,
+    BotKeyboardService,
+    BotTextService,
+  ],
+  exports: [BotService],
 })
 export class BotModule {}

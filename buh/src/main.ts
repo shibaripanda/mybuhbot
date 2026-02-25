@@ -24,7 +24,13 @@ async function bootstrap() {
     app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.KAFKA,
       options: {
-        client: { brokers: [KAFKA_BROKER] },
+        client: {
+          brokers: [KAFKA_BROKER],
+          retry: {
+            initialRetryTime: 3000,
+            retries: 20,
+          },
+        },
         consumer: {
           groupId: 'Lisener ' + KAFKA_GROUP_ID,
         },
@@ -35,8 +41,8 @@ async function bootstrap() {
     console.log(error);
   }
   await app.listen(PORT);
-  process.once('SIGINT', () => void app.close());
-  process.once('SIGTERM', () => void app.close());
+  // process.once('SIGINT', () => void app.close());
+  // process.once('SIGTERM', () => void app.close());
   console.log(`${SERVICE_NAME} started on port ${PORT}`);
 }
 

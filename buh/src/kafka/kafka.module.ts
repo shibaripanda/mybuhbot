@@ -14,6 +14,10 @@ import { KafkaService } from './kafka.service';
             client: {
               clientId: configService.get<string>('KAFKA_CLIENT_ID')!,
               brokers: [configService.get<string>('KAFKA_BROKER')!],
+              // retry: {
+              //   initialRetryTime: 3000,
+              //   retries: 20,
+              // },
             },
             consumer: {
               groupId: configService.get<string>('KAFKA_GROUP_ID')!,

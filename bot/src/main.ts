@@ -24,7 +24,13 @@ async function bootstrap() {
     app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.KAFKA,
       options: {
-        client: { brokers: [KAFKA_BROKER] },
+        client: {
+          brokers: [KAFKA_BROKER],
+          retry: {
+            initialRetryTime: 3000,
+            retries: 20,
+          },
+        },
         consumer: {
           groupId: 'Lisener ' + KAFKA_GROUP_ID,
         },
