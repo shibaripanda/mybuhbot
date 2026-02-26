@@ -2,11 +2,27 @@ import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import axios, { AxiosResponse } from 'axios';
-import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
+import {
+  InlineKeyboardButton,
+  User as tUser,
+} from 'telegraf/typings/core/types/typegram';
+import { KafkaService } from 'src/kafka/kafka.service';
+// import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class BotService {
-  constructor(@InjectBot() private bot: Telegraf) {}
+  constructor(
+    @InjectBot() private bot: Telegraf,
+    private readonly kafkaService: KafkaService,
+  ) {}
+
+  async getUser(tUser: tUser) {
+    const user = await this.kafkaService.kafkaRequest(
+      'getUserByTelegramUser',
+      tUser,
+    );
+    return user;
+  }
 
   async sendMessageReply(
     chatId: number,

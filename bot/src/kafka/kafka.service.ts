@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class KafkaService implements OnModuleInit {
@@ -10,14 +11,18 @@ export class KafkaService implements OnModuleInit {
   }
 
   onModuleInit() {
-    // await this.kafkaClient.connect();
-    this.kafkaClient.subscribeToResponseOf('deleteAccount');
-    // await this.kafkaClient.connect();
-    // this.kafkaClient.emit('test', {
-    //   value: {
-    //     message: this.configService.get<string>('SERVICE_NAME'),
-    //   },
-    //   key: 123,
-    // });
+    const user = ['getUserByTelegramUser'];
+    const patterns = [...user];
+
+    patterns.forEach((p) => this.kafkaClient.subscribeToResponseOf(p));
+  }
+
+  kafkaRequest(message: string, data: object | string) {
+    return firstValueFrom<boolean | { status: boolean }>(
+      this.kafkaClient.send(message, {
+        value: data,
+        key: message,
+      }),
+    );
   }
 }

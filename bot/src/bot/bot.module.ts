@@ -11,6 +11,7 @@ import { OpenaiModule } from 'src/openai/openai.module';
 import { BotLifecycleService } from './bot.lifecycle.service';
 import { BotKeyboardService } from './bot.keyboard.service';
 import { BotTextService } from './bot.text.service';
+import { KafkaModule } from 'src/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { BotTextService } from './bot.text.service';
         ],
       }),
     }),
+    KafkaModule,
     OpenaiModule,
   ],
   providers: [

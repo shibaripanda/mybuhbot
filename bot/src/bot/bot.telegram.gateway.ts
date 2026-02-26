@@ -28,6 +28,8 @@ export class TelegramGateway {
     console.log('@Start');
     if (!ctx.from) return;
     console.log(ctx.from);
+    const user = await this.botService.getUser(ctx.from);
+    console.log(user);
     const keyboard = this.botKeyboardService.keyboardStart();
     const text = this.botTextService.textStart();
     await this.botService.sendMessageReply(ctx.from.id, text, keyboard);
