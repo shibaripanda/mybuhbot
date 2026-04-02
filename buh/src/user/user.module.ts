@@ -4,10 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from './user.schema';
 import { UserKafkaController } from './user.kafka.controller';
 import { AccountModule } from 'src/account/account.module';
+import { CheckModule } from 'src/check/check.module';
 
 @Module({
   imports: [
     AccountModule,
+    CheckModule,
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
   ],
   controllers: [UserKafkaController],

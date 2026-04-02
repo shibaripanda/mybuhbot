@@ -12,6 +12,7 @@ import { BotLifecycleService } from './bot.lifecycle.service';
 import { BotKeyboardService } from './bot.keyboard.service';
 import { BotTextService } from './bot.text.service';
 import { KafkaModule } from 'src/kafka/kafka.module';
+import { BotBiznesService } from './bot.biznes.service';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { KafkaModule } from 'src/kafka/kafka.module';
     BotLifecycleService,
     BotKeyboardService,
     BotTextService,
+    BotBiznesService,
   ],
   exports: [BotService],
 })

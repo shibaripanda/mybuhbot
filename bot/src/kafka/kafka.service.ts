@@ -1,6 +1,13 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { Account, ServerUser } from 'src/bot/interfaces/User';
+
+interface FromServer {
+  user?: ServerUser;
+  status?: boolean;
+  accounts?: Account[];
+}
 
 @Injectable()
 export class KafkaService implements OnModuleInit {
@@ -11,14 +18,19 @@ export class KafkaService implements OnModuleInit {
   }
 
   onModuleInit() {
-    const user = ['getUserByTelegramUser'];
-    const patterns = [...user];
+    const user = [
+      'getUserByTelegramUser',
+      'getSimpleUserByTelegramUser',
+      'getUserIdByTelegramUser',
+    ];
+    const biznes = ['createNewCategory', 'createNewCheck', 'getMyAccounts'];
+    const patterns = [...user, ...biznes];
 
     patterns.forEach((p) => this.kafkaClient.subscribeToResponseOf(p));
   }
 
   kafkaRequest(message: string, data: object | string) {
-    return firstValueFrom<boolean | { status: boolean }>(
+    return firstValueFrom<FromServer>(
       this.kafkaClient.send(message, {
         value: data,
         key: message,

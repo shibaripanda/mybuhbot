@@ -1,4 +1,4 @@
-version: '3.8'
+
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -23,3 +23,16 @@ services:
       KAFKA_LOG_CLEANUP_POLICY: compact
     depends_on:
       - zookeeper
+
+  db:
+    image: mongo
+    container_name: mongo
+    ports:
+    - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/serviceapp --quiet
+    restart: always
+    volumes:
+      - ./db/data:/data/db
+      - ./db/mongodump:/dump
+

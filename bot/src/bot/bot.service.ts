@@ -7,21 +7,67 @@ import {
   User as tUser,
 } from 'telegraf/typings/core/types/typegram';
 import { KafkaService } from 'src/kafka/kafka.service';
-// import { ClientKafka } from '@nestjs/microservices';
+import { Expense, OpenaiVoiceService } from 'src/openai/openai.voice.service';
+import { ServerUser } from './interfaces/User';
 
 @Injectable()
 export class BotService {
   constructor(
     @InjectBot() private bot: Telegraf,
     private readonly kafkaService: KafkaService,
+    private openaiVoiceService: OpenaiVoiceService,
   ) {}
 
-  async getUser(tUser: tUser) {
-    const user = await this.kafkaService.kafkaRequest(
-      'getUserByTelegramUser',
-      tUser,
+  async textMessageProcessing(
+    text: string,
+    user: ServerUser,
+  ): Promise<Expense> {
+    const res = await this.openaiVoiceService.textOpenAIProcessing(text, user);
+    return res;
+  }
+
+  async voiceMessageProcessing(
+    voiceFile_id: string,
+    user: ServerUser,
+  ): Promise<Expense> {
+    const voiceBuffer = await this.getVoiceBuffer(voiceFile_id);
+    const res = await this.openaiVoiceService.voiceOpenAIProcessing(
+      voiceBuffer,
+      user,
     );
-    return user;
+    return res;
+  }
+
+  async getMyAccounts(telegramUser: tUser) {
+    const data = await this.kafkaService.kafkaRequest(
+      'getMyAccounts',
+      telegramUser,
+    );
+    return data.accounts;
+  }
+
+  async getUserId(telegramUser: tUser) {
+    const data = await this.kafkaService.kafkaRequest(
+      'getUserIdByTelegramUser',
+      telegramUser,
+    );
+    return data.user;
+  }
+
+  async getSimpleUser(telegramUser: tUser) {
+    const data = await this.kafkaService.kafkaRequest(
+      'getSimpleUserByTelegramUser',
+      telegramUser,
+    );
+    return data.user;
+  }
+
+  async getUser(telegramUser: tUser) {
+    const data = await this.kafkaService.kafkaRequest(
+      'getUserByTelegramUser',
+      telegramUser,
+    );
+    return data.user;
   }
 
   async sendMessageReply(
@@ -34,7 +80,7 @@ export class BotService {
     });
   }
 
-  async getVoiceBuffer(file_id: string) {
+  private async getVoiceBuffer(file_id: string) {
     const flink = await this.getFileLink(file_id);
     return await this.getBuffer(flink);
   }

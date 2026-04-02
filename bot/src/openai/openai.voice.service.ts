@@ -4,20 +4,31 @@ import { writeFile, unlink } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { createReadStream } from 'fs';
-import { BotService } from 'src/bot/bot.service';
+import { ServerUser } from 'src/bot/interfaces/User';
 
-interface Expense {
+export interface Expense {
+  step: number;
+  data: CreateNewCategory | CreateNewCheck;
+}
+
+export interface CreateNewCategory {
+  newAccounts: string[];
+}
+
+export interface Check {
   account: string;
-  data: string;
+  info: string;
   cost: number;
+  _id?: string;
+}
+
+export interface CreateNewCheck {
+  newChecks: Check[];
 }
 
 @Injectable()
 export class OpenaiVoiceService {
-  constructor(
-    @Inject('OPENAI_CLIENT') private readonly openai: OpenAI,
-    private botService: BotService,
-  ) {}
+  constructor(@Inject('OPENAI_CLIENT') private readonly openai: OpenAI) {}
 
   private async transcribe(audioBuffer: Buffer) {
     const filePath = join(tmpdir(), `voice-${Date.now()}.ogg`);
@@ -73,44 +84,11 @@ export class OpenaiVoiceService {
     return JSON.parse(jsonText) as Expense;
   }
 
-  // private async choosingNextStep(text: string): Promise<Expense> {
-  //   const res = await this.openaiReqest(
-  //     'Ты парсер голосовых финансовых записей. Отвечай строго JSON в формате {"account":"", "data":"", "cost":0}',
-  //     text,
-  //   );
-  //   return res;
-  // }
-
   private async choosingNextStep(
     text: string,
     accounts: string[],
   ): Promise<Expense> {
-    // const accString = accounts.length
-    //   ? accounts.join(', ')
-    //   : 'У человека еще нет статьей расходов';
     const res = await this.openaiReqest(
-      // `Существующие статьи расходов данного человека: ${accString},
-      // Что скорее всего имеет ввиду и хочет человек:
-
-      // 1.Добавить одну или несколько статей расходов (только если не существуют, существующие игнорируй в ответе)?
-      // ({step: 1, data: {"newAccounts":["название аккаунта 1", "название аккаунта 2", "название аккаунта 3"]}}),
-
-      // 2.Добавить расходы в уже существующую статью/статьи, если статьи не указаны явно - выбери наиболее подходящие из существующих (только существующие, несуществующие игнорируй в ответе)?
-      // ({step: 2, data: [{"account":"статья расходов", "info":"подробности", "cost": стоимость}]}),
-
-      // 3.Хочет узнать сумму расходов по статье/статьям (только существующие, несуществующие игнорируй в ответе)?
-      // ({step: 3, data: {"account":["название аккаунта 1", "название аккаунта 2"]}}),
-
-      // 4.Хочет удалить одну или несколько статей (удалить можно только существующую статью/статьи, несуществующие игнорируй в ответе)?
-      // ({step: 4, data: {"account":["название аккаунта 1", "название аккаунта 2", "название аккаунта 3"]}}),
-
-      // 5.Хочет узнать свой баланс?
-      // ({step: 5}),
-
-      // 0 если непонятно.
-      // ({step: 0}).
-
-      // Ты парсер голосовых финансовых записей, Отвечай строго JSON в формате исходя из примеров`
       `Ты — строго детерминированный классификатор намерения пользователя финансового ассистента.
 
 ТВОЯ ЗАДАЧА
@@ -161,6 +139,7 @@ Step 0 — непонятно
 - можно использовать новые категории
 - нельзя возвращать категории уже существующие
 - удалить дубликаты
+- с большой буквы все категории
 - если после фильтрации список пуст → step 0
 
 Для Step 2–4:
@@ -189,7 +168,7 @@ Step 1
 {"step":1,"data":{"newAccounts":["категория"]}}
 
 Step 2
-{"step":2,"data":[{"account":"категория","info":"описание","cost":100}]}
+{"step":2,"data":{"newChecks": [{"account":"категория","info":"описание","cost":100}]}}
 
 Step 3
 {"step":3,"data":{"account":["категория"]}}
@@ -216,10 +195,16 @@ Step 0
     return res;
   }
 
-  async voiceProcessingToText(voice_id: string) {
-    const voiceBuffer = await this.botService.getVoiceBuffer(voice_id);
+  async textOpenAIProcessing(text: string, user: ServerUser) {
+    const accounts = user.accounts.map((a) => a.name);
+    const res = await this.choosingNextStep(text, accounts);
+    return res;
+  }
+
+  async voiceOpenAIProcessing(voiceBuffer: Buffer, user: ServerUser) {
     const text = await this.transcribe(voiceBuffer);
-    const accounts = ['еда', 'отдых', 'такси'];
+    const accounts = user.accounts.map((a) => a.name);
+    console.log(text);
     const res = await this.choosingNextStep(text, accounts);
     return res;
   }
