@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
-import { Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
 import axios, { AxiosResponse } from 'axios';
 import {
   InlineKeyboardButton,
@@ -70,13 +70,27 @@ export class BotService {
     return data.user;
   }
 
+  async deleteOrUpdateMessage(ctx: Context, alertMessage?: string) {
+    try {
+      await ctx.answerCbQuery(alertMessage);
+      await ctx.deleteMessage();
+    } catch {
+      await ctx.editMessageText('...');
+    }
+  }
+
   async sendMessageReply(
     chatId: number,
     text: string,
     keyboard?: InlineKeyboardButton[][],
   ): Promise<void> {
-    await this.bot.telegram.sendMessage(chatId, text, {
+    const mes = await this.bot.telegram.sendMessage(chatId, text, {
       reply_markup: keyboard && { inline_keyboard: keyboard },
+    });
+    console.log(mes.message_id);
+    await this.kafkaService.kafkaRequest('updateLastMessageId', {
+      t_Id: chatId,
+      lastMessageId: mes.message_id,
     });
   }
 

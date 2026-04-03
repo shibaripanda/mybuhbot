@@ -48,18 +48,22 @@ export class TelegramGateway {
   @Action('myAccounts')
   async myAccounts(@Ctx() ctx: UserTelegrafContext) {
     console.log('myAccounts');
+    await ctx.sendChatAction('typing');
     const myAccounts = await this.botService.getMyAccounts(ctx.from);
     if (!myAccounts) return;
     const { text, keyboard } = this.botBiznesService.myAccounts(myAccounts);
     await this.botService.sendMessageReply(ctx.from.id, text, keyboard);
+    await this.botService.deleteOrUpdateMessage(ctx);
   }
 
   @Action('mainMenu')
   async mainMenu(@Ctx() ctx: UserTelegrafContext) {
     console.log('mainMenu');
+    await ctx.sendChatAction('typing');
     const text = this.botTextService.textMainMenu();
     const keyboard = this.botKeyboardService.keyboardMainMenu();
     await this.botService.sendMessageReply(ctx.from.id, text, keyboard);
+    await this.botService.deleteOrUpdateMessage(ctx, 'Главное меню');
   }
 
   @On('text')

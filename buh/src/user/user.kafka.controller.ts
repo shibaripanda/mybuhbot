@@ -24,6 +24,24 @@ export class UserKafkaController {
     };
   }
 
+  @MessagePattern('updateLastMessageId')
+  async updateLastMessageId(
+    @Payload()
+    value: {
+      t_Id: number;
+      lastMessageId: number;
+    },
+  ) {
+    // const res = await this.userService.createNewCheck(
+    //   value.userId,
+    //   value.newChecks,
+    // );
+    // return {
+    //   value: res,
+    //   key: 'createNewCheck',
+    // };
+  }
+
   @MessagePattern('createNewCheck')
   async createNewCheck(
     @Payload()

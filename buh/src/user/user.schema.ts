@@ -18,6 +18,9 @@ export class User {
   @Prop()
   language_code: string;
 
+  @Prop()
+  lastMessageId: number;
+
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Account', autopopulate: true }],
     required: true,
