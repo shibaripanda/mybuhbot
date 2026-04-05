@@ -12,8 +12,17 @@ export interface NewCheck {
 }
 
 @Controller()
-export class UserKafkaController {
+export class UserKafkaMessageController {
   constructor(private userService: UserService) {}
+
+  @MessagePattern('getUserSimpleAccounts')
+  async getUserSimpleAccounts(@Payload() value: TelegramUser) {
+    const res = await this.userService.getUserSimpleAccounts(value);
+    return {
+      value: { user: res },
+      key: 'getMyAccounts',
+    };
+  }
 
   @MessagePattern('getMyAccounts')
   async getMyAccounts(@Payload() value: TelegramUser) {
@@ -22,24 +31,6 @@ export class UserKafkaController {
       value: { accounts: res },
       key: 'getMyAccounts',
     };
-  }
-
-  @MessagePattern('updateLastMessageId')
-  async updateLastMessageId(
-    @Payload()
-    value: {
-      t_Id: number;
-      lastMessageId: number;
-    },
-  ) {
-    // const res = await this.userService.createNewCheck(
-    //   value.userId,
-    //   value.newChecks,
-    // );
-    // return {
-    //   value: res,
-    //   key: 'createNewCheck',
-    // };
   }
 
   @MessagePattern('createNewCheck')

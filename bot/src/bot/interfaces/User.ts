@@ -4,7 +4,13 @@ export interface ServerUser {
   t_name: string;
   t_username: string;
   language_code: string;
+  lastMessageId: number;
   accounts: Account[];
+}
+
+export interface SimpleUser {
+  _id: string;
+  lastMessageId: number;
 }
 
 export interface Account {

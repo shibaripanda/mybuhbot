@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import axios, { AxiosResponse } from 'axios';
 import {
   InlineKeyboardButton,
@@ -9,6 +9,7 @@ import {
 import { KafkaService } from 'src/kafka/kafka.service';
 import { Expense, OpenaiVoiceService } from 'src/openai/openai.voice.service';
 import { ServerUser } from './interfaces/User';
+import { UserTelegrafContext } from './interfaces/MyContext';
 
 @Injectable()
 export class BotService {
@@ -17,6 +18,20 @@ export class BotService {
     private readonly kafkaService: KafkaService,
     private openaiVoiceService: OpenaiVoiceService,
   ) {}
+
+  async photoMessageProcessing(
+    photoFile_id: string,
+    user: ServerUser,
+  ): Promise<Expense> {
+    const link = await this.getFileLink(photoFile_id);
+    const photoBuffer = await this.getVoiceBuffer(photoFile_id);
+    const res = await this.openaiVoiceService.photoOpenAIProcessing(
+      photoBuffer,
+      user,
+      link,
+    );
+    return res;
+  }
 
   async textMessageProcessing(
     text: string,
@@ -36,6 +51,14 @@ export class BotService {
       user,
     );
     return res;
+  }
+
+  async getUserSimpleAccounts(telegramUser: tUser) {
+    const data = await this.kafkaService.kafkaRequest(
+      'getUserSimpleAccounts',
+      telegramUser,
+    );
+    return data.user;
   }
 
   async getMyAccounts(telegramUser: tUser) {
@@ -70,28 +93,27 @@ export class BotService {
     return data.user;
   }
 
-  async deleteOrUpdateMessage(ctx: Context, alertMessage?: string) {
-    try {
-      await ctx.answerCbQuery(alertMessage);
-      await ctx.deleteMessage();
-    } catch {
-      await ctx.editMessageText('...');
-    }
-  }
-
   async sendMessageReply(
-    chatId: number,
+    ctx: UserTelegrafContext,
     text: string,
     keyboard?: InlineKeyboardButton[][],
   ): Promise<void> {
-    const mes = await this.bot.telegram.sendMessage(chatId, text, {
+    const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
       reply_markup: keyboard && { inline_keyboard: keyboard },
     });
-    console.log(mes.message_id);
-    await this.kafkaService.kafkaRequest('updateLastMessageId', {
-      t_Id: chatId,
+    await this.deleteOrUpdateMessage(ctx.from.id, ctx.simpleUser.lastMessageId);
+    this.kafkaService.kafkaEmit('updateLastMessageId', {
+      t_Id: ctx.from.id,
       lastMessageId: mes.message_id,
     });
+  }
+
+  private async deleteOrUpdateMessage(chatId: number, message_id: number) {
+    try {
+      await this.bot.telegram.deleteMessage(chatId, message_id);
+    } catch {
+      await this.bot.telegram.editMessageText(chatId, message_id, '', '...');
+    }
   }
 
   private async getVoiceBuffer(file_id: string) {

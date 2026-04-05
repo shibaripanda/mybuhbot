@@ -23,13 +23,25 @@ export class KafkaService implements OnModuleInit {
       'getSimpleUserByTelegramUser',
       'getUserIdByTelegramUser',
     ];
-    const biznes = ['createNewCategory', 'createNewCheck', 'getMyAccounts'];
+    const biznes = [
+      'createNewCategory',
+      'createNewCheck',
+      'getMyAccounts',
+      'getUserSimpleAccounts',
+    ];
     const patterns = [...user, ...biznes];
 
     patterns.forEach((p) => this.kafkaClient.subscribeToResponseOf(p));
   }
 
-  kafkaRequest(message: string, data: object | string) {
+  kafkaEmit(event: string, data: object) {
+    return this.kafkaClient.emit(event, {
+      key: event,
+      value: data,
+    });
+  }
+
+  kafkaRequest(message: string, data: object) {
     return firstValueFrom<FromServer>(
       this.kafkaClient.send(message, {
         value: data,

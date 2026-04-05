@@ -4,7 +4,7 @@ import { User, UserDocument } from './user.schema';
 import { Model, Types } from 'mongoose';
 import { TelegramUser } from './interfaces/TelegramUser';
 import { AccountService } from 'src/account/account.service';
-import { NewCheck } from './user.kafka.controller';
+import { NewCheck } from './user.kafka.message.controller';
 import { CheckService } from 'src/check/check.service';
 
 @Injectable()
@@ -14,6 +14,24 @@ export class UserService {
     private accountService: AccountService,
     private checkService: CheckService,
   ) {}
+
+  async updateLastMessageId(t_Id: number, lastMessageId: number) {
+    await this.userModel.updateOne({ t_Id }, { lastMessageId });
+  }
+
+  async getUserSimpleAccounts(user: TelegramUser) {
+    if (!user) return null;
+
+    const res = await this.userModel
+      .findOne({ t_Id: user.id }, { accounts: 1 })
+      .populate({
+        path: 'accounts',
+        // populate: { path: 'checks' },
+      })
+      .lean()
+      .exec();
+    return res;
+  }
 
   async getMyAccounts(user: TelegramUser) {
     if (!user) return null;
@@ -26,7 +44,6 @@ export class UserService {
       })
       .lean()
       .exec();
-    console.log(res?.accounts);
     return res?.accounts.map((ac) => ({
       name: ac.name,
       _id: ac._id,
@@ -52,7 +69,6 @@ export class UserService {
   async createNewCheck(userId: Types.ObjectId, checks: NewCheck[]) {
     for (const check of checks) {
       const newCheck = await this.checkService.createNewCheck(check);
-      console.log(newCheck);
       if (!newCheck) return { status: false };
       const res = await this.accountService.addNewCheck(
         check.account_id,
@@ -65,7 +81,6 @@ export class UserService {
 
   async createNewCategory(userId: Types.ObjectId, newAccounts: string[]) {
     const news = await this.accountService.createNewAccounts(newAccounts);
-    console.log(news);
     if (!news.length) return { status: false };
     const res = await this.userModel.updateOne(
       { _id: userId },
@@ -77,7 +92,6 @@ export class UserService {
         },
       },
     );
-    console.log('cr', res);
     return { status: res.modifiedCount > 0 };
   }
 
@@ -102,7 +116,10 @@ export class UserService {
   async getNewOrExistSimpleUser(user: TelegramUser): Promise<User | null> {
     if (!user) return null;
 
-    const ex = await this.userModel.findOne({ t_Id: user.id }).lean().exec();
+    const ex = await this.userModel
+      .findOne({ t_Id: user.id }, { _id: 1, lastMessageId: 1 })
+      .lean()
+      .exec();
     if (ex) {
       await this.updateUser(user, ex);
       return ex;

@@ -18,7 +18,6 @@ export class BotBiznesService {
   ) {}
 
   myAccounts(myAccounts: Account[]) {
-    console.log(myAccounts);
     return {
       text: this.botTextService.textMyAccounts(),
       keyboard: this.botKeyboardService.keyboardMyAccounts(myAccounts),

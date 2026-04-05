@@ -48,24 +48,37 @@ export class OpenaiVoiceService {
     }
   }
 
-  private async parseExpense(text: string): Promise<Expense> {
-    const res = await this.openai.chat.completions.create({
+  private async describeImage(
+    imageBuffer: Buffer,
+    link: string,
+  ): Promise<string> {
+    // const base64 = imageBuffer.toString('base64');
+
+    const res = await this.openai.responses.create({
       model: 'gpt-4.1',
-      messages: [
+      input: [
         {
-          role: 'system',
-          content:
-            'Ты парсер голосовых финансовых записей. Отвечай строго JSON в формате {"account":"", "data":"", "cost":0}',
+          role: 'user',
+          content: [
+            {
+              type: 'input_text',
+              text: `
+Извлеки весь текст с этого чека максимально точно.
+Ничего не анализируй.
+Верни только текст.
+`,
+            },
+            {
+              type: 'input_image',
+              image_url: link,
+              detail: 'high',
+            },
+          ],
         },
-        { role: 'user', content: text },
       ],
-      temperature: 0,
     });
 
-    const jsonText = res.choices?.[0]?.message?.content ?? '{}';
-
-    // Приводим к типу Expense
-    return JSON.parse(jsonText) as Expense;
+    return res.output_text;
   }
 
   private async openaiReqest(request: string, content: string) {
@@ -195,6 +208,18 @@ Step 0
     return res;
   }
 
+  async photoOpenAIProcessing(
+    photoBuffer: Buffer,
+    user: ServerUser,
+    link: string,
+  ) {
+    const text = await this.describeImage(photoBuffer, link);
+    console.log(text);
+    const accounts = user.accounts.map((a) => a.name);
+    const res = await this.choosingNextStep(text, accounts);
+    return res;
+  }
+
   async textOpenAIProcessing(text: string, user: ServerUser) {
     const accounts = user.accounts.map((a) => a.name);
     const res = await this.choosingNextStep(text, accounts);
@@ -204,7 +229,6 @@ Step 0
   async voiceOpenAIProcessing(voiceBuffer: Buffer, user: ServerUser) {
     const text = await this.transcribe(voiceBuffer);
     const accounts = user.accounts.map((a) => a.name);
-    console.log(text);
     const res = await this.choosingNextStep(text, accounts);
     return res;
   }
