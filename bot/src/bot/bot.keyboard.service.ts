@@ -1,9 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { Account } from './interfaces/User';
+// import { NewAccountControl } from 'src/kafka/kafka.service';
 
 @Injectable()
 export class BotKeyboardService {
   constructor() {}
+
+  // keyboardCreateAccounts(accounts: NewAccountControl[]) {
+  //   const res = accounts.map((ac) => [
+  //     {
+  //       text: '❌ ' + ac.name,
+  //       callback_data: `delId_${ac._id}`,
+  //       style: 'danger',
+  //     },
+  //   ]);
+  //   return res.concat(this.keyboardMenuButOk());
+  // }
 
   keyboardEmpty() {
     return [[], []];
@@ -16,7 +28,7 @@ export class BotKeyboardService {
           ac.name !== '_backet_'
             ? ac.name + ' 💵 ' + ac['sum'] + ` (${ac['count']})`
             : 'Корзина' + ' 💵 ' + ac['sum'] + ` (${ac['count']})`,
-        callback_data: `myAcc_${ac._id}`,
+        callback_data: `myAcc:${ac._id}`,
       },
     ]);
     return res.concat(this.keyboardMenuBut());
@@ -63,6 +75,18 @@ export class BotKeyboardService {
     // ];
   }
 
+  keyboardMenuButOk() {
+    return [
+      [
+        {
+          text: `Хорошо`,
+          callback_data: 'mainMenu',
+          style: 'success',
+        },
+      ],
+    ];
+  }
+
   keyboardMenuBut() {
     return [
       [
@@ -70,7 +94,6 @@ export class BotKeyboardService {
           text: `Меню`,
           callback_data: 'mainMenu',
           style: 'success',
-          icon_custom_emoji_id: '123456789',
         },
       ],
     ];

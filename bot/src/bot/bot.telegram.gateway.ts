@@ -1,5 +1,5 @@
 // import { UseGuards } from '@nestjs/common';
-import { Message } from '@telegraf/types';
+import { CallbackQuery, Message } from '@telegraf/types';
 import { Action, Ctx, On, Start, Update } from 'nestjs-telegraf';
 // import { AdminAccessGuard } from './guards/access-control.guard';
 import { BotService } from './bot.service';
@@ -7,7 +7,7 @@ import { BotKeyboardService } from './bot.keyboard.service';
 import { BotTextService } from './bot.text.service';
 import { ConfigService } from '@nestjs/config';
 import { BotBiznesService } from './bot.biznes.service';
-import { UserTelegrafContext } from './interfaces/MyContext';
+import { CallbackContext, UserTelegrafContext } from './interfaces/MyContext';
 
 @Update()
 export class TelegramGateway {
@@ -36,6 +36,24 @@ export class TelegramGateway {
     const keyboard = this.botKeyboardService.keyboardStart();
     const text = this.botTextService.textStart();
     await this.botService.sendMessageReply(ctx, text, keyboard);
+  }
+
+  @Action(/^myAcc:(.+)$/)
+  async buyByMeStartReg(@Ctx() ctx: CallbackContext) {
+    const callbackQuery = ctx.callbackQuery as CallbackQuery.DataQuery;
+    const match = callbackQuery.data.match(/^myAcc:(.+)$/);
+    if (!match) {
+      await ctx.answerCbQuery('Ошибка', { show_alert: true });
+      return;
+    }
+    await ctx.sendChatAction('typing');
+    console.log('myAcc:', match[1]);
+    const acountWithChecks = await this.botService.getAccountWithChecks(
+      ctx.from,
+      match[1],
+    );
+    // await this.botService.startRegistrationByMe(ctx.from.id, match[1]);
+    await ctx.answerCbQuery();
   }
 
   @Action('myAccounts')

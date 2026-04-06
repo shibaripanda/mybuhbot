@@ -92,7 +92,10 @@ export class UserService {
         },
       },
     );
-    return { status: res.modifiedCount > 0 };
+    return {
+      status: res.modifiedCount > 0,
+      // data: news.map((account) => ({ _id: account._id, name: account.name })),
+    };
   }
 
   async getNewOrExistUser(user: TelegramUser): Promise<User | null> {

@@ -82,7 +82,7 @@ export class BotBiznesService {
     }
     return {
       text: this.botTextService.textSuccsessNewAccount(data.newAccounts),
-      keyboard: this.botKeyboardService.keyboardMenuBut(),
+      keyboard: this.botKeyboardService.keyboardMenuButOk(),
     };
   }
 }

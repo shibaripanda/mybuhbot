@@ -23,11 +23,11 @@ export class BotTextService {
   }
 
   textSuccsessNewAccount(checks: string[]) {
-    return `✅ Акаунт(ы) созданы:\n${checks.join(',')}`;
+    return `✅ Акаунт(ы) созданы:\n${checks.join(', ')}`;
   }
 
   textSuccsessNewCheck(checks: Check[]) {
-    return `✅ Чек(и) созданы:\n${checks.map((ch) => '▫️ ' + ch.account + '\n- ' + ch.info + ' 💵 ' + ch.cost + '\n').join(',')}`;
+    return `✅ Чек(и) созданы:\n${checks.map((ch) => '▫️ ' + ch.account + '\n- ' + ch.info + ' 💵 ' + ch.cost + '\n').join(', ')}`;
   }
 
   textError() {

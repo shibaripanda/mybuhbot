@@ -19,6 +19,14 @@ export class BotService {
     private openaiVoiceService: OpenaiVoiceService,
   ) {}
 
+  async getAccountWithChecks(telegramUser: tUser, account_id: string) {
+    const data = await this.kafkaService.kafkaRequest(
+      'getAccountWithChecks',
+      telegramUser,
+    );
+    return data.accounts;
+  }
+
   async photoMessageProcessing(
     photoFile_id: string,
     user: ServerUser,
@@ -110,7 +118,10 @@ export class BotService {
 
   private async deleteOrUpdateMessage(chatId: number, message_id: number) {
     try {
-      await this.bot.telegram.deleteMessage(chatId, message_id);
+      await this.bot.telegram.editMessageReplyMarkup(chatId, message_id, '', {
+        inline_keyboard: [],
+      });
+      // await this.bot.telegram.deleteMessage(chatId, message_id);
     } catch {
       await this.bot.telegram.editMessageText(chatId, message_id, '', '...');
     }

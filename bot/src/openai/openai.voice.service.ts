@@ -181,7 +181,7 @@ Step 1
 {"step":1,"data":{"newAccounts":["категория"]}}
 
 Step 2
-{"step":2,"data":{"newChecks": [{"account":"категория","info":"описание","cost":100}]}}
+{"step":2,"data":{"newChecks": [{"account":"категория","info":"описание","cost":100.50}]}}
 
 Step 3
 {"step":3,"data":{"account":["категория"]}}

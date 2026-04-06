@@ -7,6 +7,12 @@ interface FromServer {
   user?: ServerUser;
   status?: boolean;
   accounts?: Account[];
+  data?: NewAccountControl[];
+}
+
+export interface NewAccountControl {
+  _id: string;
+  name: string;
 }
 
 @Injectable()
