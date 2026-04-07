@@ -17,6 +17,22 @@ export class BotBiznesService {
     private botTextService: BotTextService,
   ) {}
 
+  accountWhithCheckList(accountWhithCheck: Account) {
+    const count = accountWhithCheck.checks.reduce(
+      (acc, ch) => acc + ch.cost,
+      0,
+    );
+
+    return {
+      text: this.botTextService.textCheckList(
+        count,
+        accountWhithCheck.name,
+        accountWhithCheck.checks,
+      ),
+      keyboard: this.botKeyboardService.keyboardMenuButOk(),
+    };
+  }
+
   myAccounts(myAccounts: Account[]) {
     return {
       text: this.botTextService.textMyAccounts(),

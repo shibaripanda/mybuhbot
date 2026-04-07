@@ -37,9 +37,9 @@ export class BotKeyboardService {
   keyboardMainMenu() {
     const buttons = [
       { t: 'Мои аккаунты', c: 'myAccounts', s: 'success' },
-      { t: 'Расходы за сегодня', c: 'myAccounts', s: 'primary' },
-      { t: 'Расходы за 7 дней', c: 'myMoney_7', s: 'primary' },
-      { t: 'Расходы за 30 дней', c: 'myMoney_30', s: 'primary' },
+      // { t: 'Расходы за сегодня', c: 'myAccounts', s: 'primary' },
+      // { t: 'Расходы за 7 дней', c: 'myMoney_7', s: 'primary' },
+      // { t: 'Расходы за 30 дней', c: 'myMoney_30', s: 'primary' },
     ];
     return buttons.map((b) => [{ text: b.t, callback_data: b.c, style: b.s }]);
     // return [

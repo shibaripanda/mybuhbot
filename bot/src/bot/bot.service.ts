@@ -9,7 +9,7 @@ import {
 import { KafkaService } from 'src/kafka/kafka.service';
 import { Expense, OpenaiVoiceService } from 'src/openai/openai.voice.service';
 import { ServerUser } from './interfaces/User';
-import { UserTelegrafContext } from './interfaces/MyContext';
+import { CallbackContext, UserTelegrafContext } from './interfaces/MyContext';
 
 @Injectable()
 export class BotService {
@@ -20,11 +20,11 @@ export class BotService {
   ) {}
 
   async getAccountWithChecks(telegramUser: tUser, account_id: string) {
-    const data = await this.kafkaService.kafkaRequest(
-      'getAccountWithChecks',
-      telegramUser,
-    );
-    return data.accounts;
+    const data = await this.kafkaService.kafkaRequest('getAccountWithChecks', {
+      ...telegramUser,
+      account_id,
+    });
+    return data.accountWithChecks;
   }
 
   async photoMessageProcessing(
@@ -101,6 +101,22 @@ export class BotService {
     return data.user;
   }
 
+  async sendMessageReplyAction(
+    ctx: CallbackContext,
+    text: string,
+    keyboard?: InlineKeyboardButton[][],
+  ): Promise<void> {
+    const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
+      reply_markup: keyboard && { inline_keyboard: keyboard },
+      parse_mode: 'HTML',
+    });
+    await this.deleteOrUpdateMessage(ctx.from.id, ctx.simpleUser.lastMessageId);
+    this.kafkaService.kafkaEmit('updateLastMessageId', {
+      t_Id: ctx.from.id,
+      lastMessageId: mes.message_id,
+    });
+  }
+
   async sendMessageReply(
     ctx: UserTelegrafContext,
     text: string,
@@ -108,6 +124,7 @@ export class BotService {
   ): Promise<void> {
     const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
       reply_markup: keyboard && { inline_keyboard: keyboard },
+      parse_mode: 'HTML',
     });
     await this.deleteOrUpdateMessage(ctx.from.id, ctx.simpleUser.lastMessageId);
     this.kafkaService.kafkaEmit('updateLastMessageId', {

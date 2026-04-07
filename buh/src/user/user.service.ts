@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema';
 import { Model, Types } from 'mongoose';
-import { TelegramUser } from './interfaces/TelegramUser';
+import {
+  GetAccountWithChecks,
+  TelegramUser,
+} from './interfaces/KafkaInterfaces';
 import { AccountService } from 'src/account/account.service';
 import { NewCheck } from './user.kafka.message.controller';
 import { CheckService } from 'src/check/check.service';
@@ -14,6 +17,19 @@ export class UserService {
     private accountService: AccountService,
     private checkService: CheckService,
   ) {}
+
+  async getAccountWithChecks(value: GetAccountWithChecks) {
+    const res = await this.accountService.getAccountWithChecks(
+      value.account_id,
+    );
+    // return res?.accounts.map((ac) => ({
+    //   name: ac.name,
+    //   _id: ac._id,
+    //   sum: ac.checks.reduce((acc, ch) => acc + ch.cost, 0),
+    //   count: ac.checks.length,
+    // }));
+    return res;
+  }
 
   async updateLastMessageId(t_Id: number, lastMessageId: number) {
     await this.userModel.updateOne({ t_Id }, { lastMessageId });

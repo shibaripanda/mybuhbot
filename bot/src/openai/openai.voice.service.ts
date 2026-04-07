@@ -15,7 +15,7 @@ export interface CreateNewCategory {
   newAccounts: string[];
 }
 
-export interface Check {
+export interface Check1 {
   account: string;
   info: string;
   cost: number;
@@ -23,7 +23,7 @@ export interface Check {
 }
 
 export interface CreateNewCheck {
-  newChecks: Check[];
+  newChecks: Check1[];
 }
 
 @Injectable()

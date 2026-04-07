@@ -8,6 +8,7 @@ interface FromServer {
   status?: boolean;
   accounts?: Account[];
   data?: NewAccountControl[];
+  accountWithChecks?: Account;
 }
 
 export interface NewAccountControl {
@@ -34,6 +35,7 @@ export class KafkaService implements OnModuleInit {
       'createNewCheck',
       'getMyAccounts',
       'getUserSimpleAccounts',
+      'getAccountWithChecks',
     ];
     const patterns = [...user, ...biznes];
 

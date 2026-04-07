@@ -1,7 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { TelegramUser } from './interfaces/TelegramUser';
+import {
+  GetAccountWithChecks,
+  TelegramUser,
+} from './interfaces/KafkaInterfaces';
 import { Types } from 'mongoose';
 
 export interface NewCheck {
@@ -14,6 +17,15 @@ export interface NewCheck {
 @Controller()
 export class UserKafkaMessageController {
   constructor(private userService: UserService) {}
+
+  @MessagePattern('getAccountWithChecks')
+  async getAccountWithChecks(@Payload() value: GetAccountWithChecks) {
+    const res = await this.userService.getAccountWithChecks(value);
+    return {
+      value: { accountWithChecks: res },
+      key: 'getAccountWithChecks',
+    };
+  }
 
   @MessagePattern('getUserSimpleAccounts')
   async getUserSimpleAccounts(@Payload() value: TelegramUser) {

@@ -7,17 +7,17 @@ export type AccountDocument = HydratedDocument<Account>;
 @Schema({ timestamps: true })
 export class Account {
   @Prop({ required: true })
-  name: string;
+  name!: string;
 
   @Prop({ default: 0 })
-  count: number;
+  count!: number;
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Check', autopopulate: true }],
     required: true,
     default: [],
   })
-  checks: CheckDocument[];
+  checks!: CheckDocument[];
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

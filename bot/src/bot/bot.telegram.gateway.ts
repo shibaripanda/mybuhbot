@@ -46,14 +46,19 @@ export class TelegramGateway {
       await ctx.answerCbQuery('Ошибка', { show_alert: true });
       return;
     }
+    await ctx.answerCbQuery();
     await ctx.sendChatAction('typing');
     console.log('myAcc:', match[1]);
-    const acountWithChecks = await this.botService.getAccountWithChecks(
+    const accountWithChecks = await this.botService.getAccountWithChecks(
       ctx.from,
       match[1],
     );
-    // await this.botService.startRegistrationByMe(ctx.from.id, match[1]);
-    await ctx.answerCbQuery();
+    console.log(accountWithChecks);
+    if (!accountWithChecks) return;
+    const { text, keyboard } =
+      this.botBiznesService.accountWhithCheckList(accountWithChecks);
+
+    await this.botService.sendMessageReplyAction(ctx, text, keyboard);
   }
 
   @Action('myAccounts')

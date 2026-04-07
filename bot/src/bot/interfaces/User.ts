@@ -24,4 +24,5 @@ export interface Check {
   _id: string;
   info: string;
   cost: number;
+  createdAt: Date;
 }

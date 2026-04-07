@@ -6,10 +6,10 @@ export type CheckDocument = HydratedDocument<Check>;
 @Schema({ timestamps: true })
 export class Check {
   @Prop()
-  info: string;
+  info!: string;
 
   @Prop()
-  cost: number;
+  cost!: number;
 }
 
 export const CheckSchema = SchemaFactory.createForClass(Check);

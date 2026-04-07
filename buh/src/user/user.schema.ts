@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { AccountDocument } from 'src/account/account.schema';
+import { AccountDocument } from '../account/account.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -13,20 +13,20 @@ export class User {
   t_Id?: number;
 
   @Prop()
-  t_username: string;
+  t_username!: string;
 
   @Prop()
-  language_code: string;
+  language_code!: string;
 
   @Prop()
-  lastMessageId: number;
+  lastMessageId!: number;
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Account', autopopulate: true }],
     required: true,
     default: [],
   })
-  accounts: AccountDocument[];
+  accounts!: AccountDocument[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
